@@ -1,21 +1,33 @@
+{-# LANGUAGE DeriveAnyClass #-}
+
 module Ray.Buffer
   ( Buffer(..)
+  , unwrap
   , mkBuffer
   , toByteString
   ) where
 
 import Foreign.C.Types (CInt)
 import Data.ByteString (ByteString)
-import Data.Word (Word32)
-import Data.Vector.Storable (Vector)
-import qualified Data.Vector.Storable as Vector (replicate)
-import Data.Vector.Storable.ByteString (vectorToByteString)
+import qualified Data.ByteString as ByteString
+import Data.Vector (Vector)
+import qualified Data.Vector as Vector
+
 import SDL (V2(..))
 
-newtype Buffer = Buffer (Vector Word32)
+import Ray.Color (Color(..))
+import qualified Ray.Color as Color
 
-mkBuffer :: V2 CInt -> Word32 -> Buffer
+newtype Buffer = Buffer (Vector Color)
+
+unwrap :: Buffer -> Vector Color
+unwrap (Buffer vec) = vec
+
+mkBuffer :: V2 CInt -> Color -> Buffer
 mkBuffer (V2 w h) c = Buffer $ Vector.replicate (fromIntegral w * fromIntegral h) c
 
 toByteString :: Buffer -> ByteString
-toByteString (Buffer vec) = vectorToByteString vec
+toByteString = ByteString.pack
+  . concatMap Color.toBytes
+  . Vector.toList
+  . unwrap

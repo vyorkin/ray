@@ -10,6 +10,7 @@ import qualified Ray.Events as Events
 import Ray.Texture (Texture)
 import qualified Ray.Texture as Texture
 import Ray.Buffer (Buffer, mkBuffer)
+import qualified Ray.Color as Color
 
 data Context = Context
   { window :: !SDL.Window
@@ -39,7 +40,7 @@ setup Config{..} = do
     }
   renderer <- SDL.createRenderer window (-1) SDL.defaultRenderer
   texture <- Texture.new renderer windowSize SDL.TextureAccessStatic
-  let buffer = mkBuffer windowSize 100
+  let buffer = mkBuffer windowSize Color.green
   pure Context{..}
 
 loop :: Context -> IO ()

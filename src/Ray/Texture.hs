@@ -29,12 +29,12 @@ update (Texture tex size@(V2 w _)) buf = do
   let -- Raw pixels to draw onto the texture
       pixels = Buffer.toByteString buf
       -- Size in bytes of a single row of pixels
-      pitch = w * bytesInWord32
+      pitch = w * bytesInColor
   tex' <- SDL.updateTexture tex Nothing pixels pitch
   pure $ Texture tex' size
   where
-    bytesInWord32 :: CInt
-    bytesInWord32 = 4
+    bytesInColor :: CInt
+    bytesInColor = 4
 
 render :: Texture -> SDL.Renderer -> IO ()
 render (Texture tex _) renderer = do
