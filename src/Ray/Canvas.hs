@@ -29,11 +29,10 @@ newCanvas renderer size@(V2 w _) = do
       pitch = w * colorBytes
   pure Canvas{..}
   where
-    colorBytes :: CInt
     colorBytes = 4
 
 update :: Canvas -> SDL.Renderer -> IO Canvas
 update Canvas{..} renderer = do
-   tex <- Texture.update texture pitch buffer
-   Texture.render texture renderer
-   pure $ Canvas{ texture = tex, .. }
+  tex <- Texture.update texture pitch buffer
+  Texture.render texture renderer
+  pure $ Canvas{ texture = tex, .. }

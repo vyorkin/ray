@@ -1,6 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
 module Ray.Scene
   ( Scene(..)
+
   , example
   , render
   , project
@@ -15,27 +16,24 @@ import SDL (V2(..), V3(..))
 import Ray.Color (Color)
 import qualified Ray.Color as Color
 import Ray.Buffer (Buffer(..))
-import Ray.Scene.Types (Scene(..), Point(..), Camera(..), Sphere(..), mkSphere)
+import Ray.Scene.Types (Scene(..), Camera(..), Sphere(..), mkSphere)
 import Ray.Canvas (Canvas(..))
 import qualified Ray.Math as Math (project, traceRay)
 
 render :: Scene -> Canvas -> Canvas
 render scene@Scene{..} Canvas{..} =
-  let points = traceRays size scene
-      colors = map (\(Point _ c) -> c) points
+  let colors = traceRays size scene
    in Canvas { buffer = Buffer colors, .. }
 
-traceRays :: V2 CInt -> Scene -> [Point]
+traceRays :: V2 CInt -> Scene -> [Color]
 traceRays canvasSize scene@Scene{..} = do
   let V2 cw ch = fromIntegral <$> canvasSize
       (xl, xr) = (-cw/2, cw/2)
       (yb, yt) = (-ch/2, ch/2)
   y <- [yb..yt - 1]
   x <- [xl..xr - 1]
-  let point = V2 x y
-      ray = project canvasSize scene point
-  let color = traceRay scene ray
-  pure $! Point point color
+  let ray = project canvasSize scene (V2 x (-y))
+  pure $ traceRay scene ray
 
 traceRay :: Scene -> V3 CFloat -> Color
 traceRay Scene{camera = Camera origin, ..} ray =
