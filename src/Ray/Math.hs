@@ -1,37 +1,45 @@
+{-# LANGUAGE BangPatterns #-}
 module Ray.Math
   ( traceRay
   , intersect
+  , project
 
   , module Ray.Math.V3
   , module Ray.Math.Intersection
   ) where
 
+import Data.Foldable (foldr')
+import Data.List (foldl')
+import Debug.Trace (trace)
 import Data.Maybe (mapMaybe)
-import Foreign.C.Types (CFloat)
-import SDL (V3(..))
+import Control.DeepSeq (force)
+import Foreign.C.Types (CInt, CFloat)
+import SDL (V2(..), V3(..))
 
 import Ray.Scene.Types (Sphere(..))
 import Ray.Color (Color)
 
 import Ray.Math.V3 ((<.>))
-import Ray.Math.Intersection (Intersection(..))
+import Ray.Math.Intersection (Intersection(..), point, inBounds)
 import qualified Ray.Math.Intersection as Intersection
 
 -- | Computes the intersection of the ray with every sphere,
 -- and returns the color of the sphere at the nearest intersection
 -- which is inside the requested range of 't'.
 traceRay :: [Sphere] -> V3 CFloat -> V3 CFloat -> (CFloat, CFloat) -> Color
-traceRay spheres origin ray bounds =
-  let is = mapMaybe (intersect origin ray) spheres
-  in Intersection.toColor $ foldr nearest Nothing is
+traceRay !spheres !origin !ray bounds =
+  let !is = force $ mapMaybe (intersect origin ray) spheres
+      !color = Intersection.toColor $ foldl' nearest Nothing is
+   in color
   where
-    nearest i1 = maybe (clamp i1) (closest i1)
+    nearest i2 i1 = maybe (Just i1) (closest i1) i2
     closest i1 i2 =
-      let (t1, t2) = (Intersection.point i1, Intersection.point i2)
-       in clamp (if t1 < t2 then i1 else i2)
-    clamp i
-      | Intersection.inBounds i bounds = Just i
-      | otherwise = Nothing
+      let (t1, t2) = (point i1, point i2)
+          i = if t1 < t2 then i1 else i2
+       in (Just i)
+    -- clamp i
+    --   | inBounds i bounds = Just i
+    --   | otherwise = Nothing
 
 -- | Returns two points of intersection between ray and sphere.
 -- * O - origin
@@ -52,3 +60,15 @@ intersect origin ray s =
     if d < 0
     then Nothing
     else Just $ Intersection s (min t1 t2)
+
+-- | Projects a point on canvas to viewport.
+project
+  :: V2 CInt   -- ^ Canvas size
+  -> V2 CFloat -- ^ Viewport size
+  -> CFloat    -- ^ Distance from origin to a projection plane
+  -> V2 CFloat -- ^ Point coordinates
+  -> V3 CFloat
+project (V2 cw ch) (V2 vw vh) d (V2 x y) =
+  let dw = vw / fromIntegral cw
+      dh = vh / fromIntegral ch
+   in V3 (x * dw) (y * dh) d

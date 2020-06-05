@@ -1,5 +1,6 @@
 module Ray (run) where
 
+import Foreign.C.Types (CInt)
 import Control.Monad (when, unless)
 
 import SDL (V2(..), ($=))
@@ -7,17 +8,16 @@ import qualified SDL
 
 import Ray.Config (Config(..))
 import qualified Ray.Events as Events
-import Ray.Texture (Texture)
-import qualified Ray.Texture as Texture
-import Ray.Buffer (Buffer, mkBuffer)
-import qualified Ray.Buffer as Buffer
-import qualified Ray.Color as Color
+import Ray.Scene (Scene(..))
+import qualified Ray.Scene as Scene
+import Ray.Canvas (Canvas(..), newCanvas)
+import qualified Ray.Canvas as Canvas
 
 data Context = Context
   { window :: !SDL.Window
   , renderer :: !SDL.Renderer
-  , texture :: !Texture
-  , buffer :: !Buffer
+  , canvas :: !Canvas
+  , scene :: !Scene
   }
 
 run :: Config -> IO ()
@@ -33,31 +33,36 @@ setup Config{..} = do
   renderQuality <- SDL.get SDL.HintRenderScaleQuality
   when (renderQuality /= SDL.ScaleLinear) $
     putStrLn "Warning: Linear texture filtering not enabled!"
-
-  let windowSize = V2 (fromIntegral width) (fromIntegral height)
-  window <- SDL.createWindow "Ray tracer" SDL.defaultWindow
-    { SDL.windowInitialSize = windowSize
-    , SDL.windowGraphicsContext = SDL.OpenGLContext SDL.defaultOpenGL
-    }
+  window <- createWindow windowSize
+  SDL.showWindow window
   renderer <- SDL.createRenderer window (-1) SDL.defaultRenderer
-  texture <- Texture.new renderer windowSize SDL.TextureAccessStatic
-  let
-    putColor = Buffer.write windowSize
-    buffer = putColor (V2 10 10) Color.red
-           $ putColor (V2 100 100) Color.red
-           $ mkBuffer windowSize Color.black
-  pure Context{..}
+  let scene = Scene.example
+  canvas <- newCanvas renderer windowSize
+  pure $ Context{..}
+  where
+    windowSize = fromIntegral <$> V2 width height
 
 loop :: Context -> IO ()
-loop Context{..} = do
+loop ctx = do
   quit <- Events.handle
-  unless quit do
-    tex <- Texture.update texture buffer
-    Texture.render texture renderer
-    loop $ Context{ texture = tex, .. }
+  unless quit (draw ctx >>= loop)
+
+draw :: Context -> IO Context
+draw Context{..} = do
+  let cvs = Scene.render scene canvas
+  -- let cvs = Scene.renderTest canvas
+  cvs' <- Canvas.update cvs renderer
+  pure Context { canvas = cvs', ..}
 
 cleanUp :: Context -> IO ()
 cleanUp Context{..} = do
   SDL.destroyRenderer renderer
   SDL.destroyWindow window
   SDL.quit
+
+createWindow :: V2 CInt -> IO SDL.Window
+createWindow size =
+  SDL.createWindow "Ray tracer" SDL.defaultWindow
+    { SDL.windowInitialSize = size
+    , SDL.windowGraphicsContext = SDL.OpenGLContext SDL.defaultOpenGL
+    }

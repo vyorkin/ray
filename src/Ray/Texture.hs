@@ -24,17 +24,12 @@ new renderer size access = Texture
   <$> SDL.createTexture renderer SDL.RGBA8888 access size
   <*> pure size
 
-update :: Texture -> Buffer -> IO Texture
-update (Texture tex size@(V2 w _)) buf = do
-  let -- Raw pixels to draw onto the texture
-      pixels = Buffer.toByteString buf
-      -- Size in bytes of a single row of pixels
-      pitch = w * bytesInColor
+update :: Texture -> CInt -> Buffer -> IO Texture
+update (Texture tex size) pitch buf = do
+  -- Raw pixels to draw onto the texture
+  let pixels = Buffer.toByteString buf
   tex' <- SDL.updateTexture tex Nothing pixels pitch
   pure $ Texture tex' size
-  where
-    bytesInColor :: CInt
-    bytesInColor = 4
 
 render :: Texture -> SDL.Renderer -> IO ()
 render (Texture tex _) renderer = do

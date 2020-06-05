@@ -15,7 +15,7 @@ newtype Camera = Camera (V3 CFloat)
 
 data Scene = Scene
   { viewportSize :: !(V2 CFloat)
-  -- ^ Size of the viewport
+  -- ^ Size of a viewport
   , projPlaneZ :: !CFloat
   -- ^ Distance from origin to a projection plane
   , camera :: !Camera
@@ -25,7 +25,7 @@ data Scene = Scene
 data Sphere = Sphere
   { center :: !(V3 CFloat)
   , radius :: !CFloat
-  , color  :: !Color
+  , color :: !Color
   } deriving (Eq, Show)
 
 mkSphere :: V3 CFloat -> Color -> Sphere

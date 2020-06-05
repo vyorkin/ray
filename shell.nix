@@ -19,6 +19,8 @@ in nixpkgs.haskellPackages.shellFor {
 
     pretty-simple
     pretty-show
+
+    threadscope
   ];
 
   shellHook = ''
