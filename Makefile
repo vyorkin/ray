@@ -1,5 +1,5 @@
 EXE := ray
-GHC_OPTIONS := --ghc-options='-ferror-spans -fhide-source-paths -fprof-auto -rtsopts' # -fprint-unicode-syntax
+GHC_OPTIONS := --ghc-options='-ferror-spans -fhide-source-paths -fprof-auto' # -fprint-unicode-syntax
 
 dev: all
 	ghcid --command="cabal new-repl $(GHC_OPTIONS)" | source-highlight -s haskell -f esc
