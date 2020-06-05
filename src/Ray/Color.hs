@@ -7,6 +7,8 @@ module Ray.Color
   , green
   , blue
   , black
+
+  , bg
   ) where
 
 import Data.Word (Word8)
@@ -37,3 +39,6 @@ blue = Color 0 0 255 255
 
 black :: Color
 black = Color 0 0 0 255
+
+bg :: Color
+bg = white

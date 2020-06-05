@@ -29,6 +29,11 @@ library
                        Ray.Texture
                        Ray.Color
                        Ray.Buffer
+                       Ray.Scene
+                         Ray.Scene.Types
+                       Ray.Math
+                         Ray.Math.V3
+                         Ray.Math.Intersection
 
   build-depends:       base ^>= 4.13
                      , text ^>= 1.2
