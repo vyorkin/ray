@@ -1,6 +1,7 @@
 module Ray.Scene.Types
   ( Scene(..)
   , Camera(..)
+  , Point(..)
   , Sphere(..)
   , mkSphere
   ) where
@@ -9,6 +10,8 @@ import Foreign.C.Types (CFloat)
 import SDL (V2, V3)
 
 import Ray.Color (Color(..))
+
+data Point = Point !(V2 CFloat) !Color
 
 newtype Camera = Camera (V3 CFloat)
   deriving (Eq, Show)

@@ -40,9 +40,7 @@ library
                      , text ^>= 1.2
                      , bytestring ^>= 0.10
                      , containers ^>= 0.6
-                     , vector ^>= 0.12
                      , sdl2 ^>= 2.5
-                     , deepseq ^>= 1.4
 
   ghc-options:         -Wall
                        -Wincomplete-uni-patterns
@@ -77,6 +75,7 @@ executable ray
   build-depends:       base
                      , ray
   ghc-options:         -Wall
+                       -O2
                        -threaded
                        -eventlog
                        -rtsopts

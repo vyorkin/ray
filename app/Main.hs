@@ -6,6 +6,6 @@ import Ray.Config (Config(..))
 main :: IO ()
 main = do
   let
-    width = 640
-    height = 640
+    width = 600
+    height = 600
   run Config{..}

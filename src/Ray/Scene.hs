@@ -3,54 +3,39 @@ module Ray.Scene
   ( Scene(..)
   , example
   , render
-  , renderTest
   , project
   , traceRay
 
   , module Ray.Scene.Types
   ) where
 
-import Control.DeepSeq (force)
-import Data.Foldable (foldr')
-import Data.List (foldl')
 import Foreign.C.Types (CInt, CFloat)
-import Debug.Trace (traceM)
 import SDL (V2(..), V3(..))
 
 import Ray.Color (Color)
 import qualified Ray.Color as Color
-import Ray.Scene.Types (Scene(..), Camera(..), Sphere(..), mkSphere)
+import Ray.Buffer (Buffer(..))
+import Ray.Scene.Types (Scene(..), Point(..), Camera(..), Sphere(..), mkSphere)
 import Ray.Canvas (Canvas(..))
-import qualified Ray.Canvas as Canvas
 import qualified Ray.Math as Math (project, traceRay)
 
 render :: Scene -> Canvas -> Canvas
-render scene@Scene{..} canvas@Canvas{..} =
+render scene@Scene{..} Canvas{..} =
   let points = traceRays size scene
-   in foldl' draw canvas points
-  where
-    draw cvs (!point, !color) = Canvas.putPixel (round <$> point) color cvs
+      colors = map (\(Point _ c) -> c) points
+   in Canvas { buffer = Buffer colors, .. }
 
-renderTest :: Canvas -> Canvas
-renderTest =
-    Canvas.putPixel (V2 100 10) Color.red
-  . Canvas.putPixel (V2 50 300) Color.green
-  . Canvas.putPixel (V2 30 200) Color.blue
-
-traceRays :: V2 CInt -> Scene -> [(V2 CFloat, Color)]
+traceRays :: V2 CInt -> Scene -> [Point]
 traceRays canvasSize scene@Scene{..} = do
   let V2 cw ch = fromIntegral <$> canvasSize
       (xl, xr) = (-cw/2, cw/2)
       (yb, yt) = (-ch/2, ch/2)
-  !y <- [yb..yt - 1]
-  !x <- [xl..xr - 1]
-  -- traceM $ "(x, y) = " <> show (x, y)
-  let !point = V2 x y
-      ray = force $ project canvasSize scene point
-  -- traceM $ "point = " <> show (V2 x y)
-  -- traceM $ "ray = " <> show ray
-  let color = force $ traceRay scene ray
-  pure (point, color)
+  y <- [yb..yt - 1]
+  x <- [xl..xr - 1]
+  let point = V2 x y
+      ray = project canvasSize scene point
+  let color = traceRay scene ray
+  pure $! Point point color
 
 traceRay :: Scene -> V3 CFloat -> Color
 traceRay Scene{camera = Camera origin, ..} ray =

@@ -1,7 +1,6 @@
 module Ray.Canvas
   ( Canvas(..)
   , newCanvas
-  , putPixel
   , update
   ) where
 
@@ -12,8 +11,6 @@ import qualified SDL
 import Ray.Texture (Texture)
 import qualified Ray.Texture as Texture
 import Ray.Buffer (Buffer, mkBuffer)
-import qualified Ray.Buffer as Buffer
-import Ray.Color (Color)
 import qualified Ray.Color as Color
 
 data Canvas = Canvas
@@ -34,10 +31,6 @@ newCanvas renderer size@(V2 w _) = do
   where
     colorBytes :: CInt
     colorBytes = 4
-
-putPixel :: V2 CInt -> Color -> Canvas -> Canvas
-putPixel point color canvas =
-  canvas { buffer = Buffer.write (size canvas) point color (buffer canvas) }
 
 update :: Canvas -> SDL.Renderer -> IO Canvas
 update Canvas{..} renderer = do

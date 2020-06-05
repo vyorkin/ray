@@ -8,7 +8,6 @@ module Ray.Math.Intersection
   ) where
 
 import Foreign.C.Types (CFloat)
-import Control.DeepSeq (NFData(..))
 
 import Ray.Scene.Types (Sphere(..))
 import Ray.Color (Color)
@@ -16,9 +15,6 @@ import qualified Ray.Color as Color
 
 -- | Nearest intersection point between ray and sphere.
 data Intersection = Intersection !Sphere !CFloat
-
-instance NFData Intersection where
-  rnf = pure ()
 
 sphere :: Intersection -> Sphere
 sphere (Intersection s _) = s

@@ -11,7 +11,6 @@ module Ray.Color
   , bg
   ) where
 
-import Control.DeepSeq (NFData(..))
 import Data.Word (Word8)
 
 data Color = Color
@@ -20,9 +19,6 @@ data Color = Color
   , b :: !Word8
   , a :: !Word8
   } deriving (Eq, Show)
-
-instance NFData Color where
-  rnf = pure ()
 
 toBytes :: Color -> [Word8]
 toBytes (Color r g b a) = [a, b, g, r]
