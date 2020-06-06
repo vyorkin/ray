@@ -64,5 +64,5 @@ createWindow :: V2 CInt -> IO SDL.Window
 createWindow size =
   SDL.createWindow "Ray tracer" SDL.defaultWindow
     { SDL.windowInitialSize = size
-    , SDL.windowGraphicsContext = SDL.OpenGLContext SDL.defaultOpenGL
+    , SDL.windowGraphicsContext = SDL.OpenGLContext SDL.defaultOpenGL { SDL.glProfile = SDL.Core SDL.Normal 4 0 }
     }
