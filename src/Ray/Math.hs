@@ -12,7 +12,7 @@ import Control.Monad (guard)
 import Data.List (foldl')
 import Data.Maybe (mapMaybe)
 import Foreign.C.Types (CInt, CFloat)
-import SDL (V2(..), V3(..), distance, dot)
+import SDL (V2(..), V3(..), distance, dot, norm)
 
 import Ray.Scene.Types (Object(..), Circle(..), Plane(..), Sphere(..), Square(..))
 import Ray.Color (Color)
@@ -64,7 +64,13 @@ intersect start ray (OCircle (Circle plane radius) color) = do
   let r1 = distance (origin plane) (start + fmap (* len) ray)
   guard (r1 <= radius)
   pure i
-intersect start ray (OSquare Square {..} color) = Nothing
+intersect start ray (OSquare Square {..} color) = do
+  i@(Intersection _ len) <- intersectPlane start ray color plane
+  let inPlane = (start + fmap (* len) ray) - origin plane
+      xdist = xdir `dot` inPlane
+      ydist = norm $ inPlane - fmap (* xdist) xdir
+  guard (xdist <= width && ydist <= height)
+  pure i
 
 -- | Private plane intersection helper.
 intersectPlane :: V3 CFloat -> V3 CFloat -> Color -> Plane -> Maybe Intersection
