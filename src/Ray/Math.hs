@@ -8,12 +8,13 @@ module Ray.Math
   , module Ray.Math.Intersection
   ) where
 
+import Control.Monad (guard)
 import Data.List (foldl')
 import Data.Maybe (mapMaybe)
 import Foreign.C.Types (CInt, CFloat)
-import SDL (V2(..), V3(..))
+import SDL (V2(..), V3(..), distance, dot)
 
-import Ray.Scene.Types (Object(..), Plane(..), Sphere(..))
+import Ray.Scene.Types (Object(..), Circle(..), Plane(..), Sphere(..), Square(..))
 import Ray.Color (Color)
 
 import Ray.Math.V3 ((<.>))
@@ -32,7 +33,7 @@ traceRay objects origin ray _bounds =
     closest i1 i2 =
       let (t1, t2) = (point i1, point i2)
           i = if t1 < t2 then i1 else i2
-       in (Just i)
+       in Just i
     -- clamp i
     --   | inBounds i bounds = Just i
     --   | otherwise = Nothing
@@ -56,7 +57,26 @@ intersect origin ray (OSphere s color) =
     if d < 0
     then Nothing
     else Just $ Intersection color (min t1 t2)
-intersect origin ray (OPlane p color) = Nothing
+intersect start ray (OPlane plane color) =
+  intersectPlane start ray color plane
+intersect start ray (OCircle (Circle plane radius) color) = do
+  i@(Intersection _ len) <- intersectPlane start ray color plane
+  let r1 = distance (origin plane) (start + fmap (* len) ray)
+  guard (r1 <= radius)
+  pure i
+intersect start ray (OSquare Square {..} color) = Nothing
+
+-- | Private plane intersection helper.
+intersectPlane :: V3 CFloat -> V3 CFloat -> Color -> Plane -> Maybe Intersection
+intersectPlane start ray color Plane {..} =
+  let
+    prod = normal `dot` ray
+    w    = start - origin
+    len  = (- (normal `dot` w)) / (normal `dot` ray)
+  in
+    if prod >= 0
+    then Nothing
+    else Just $ Intersection color len
 
 -- | Projects a point on canvas to viewport.
 project
