@@ -16,7 +16,7 @@ import SDL (V2(..), V3(..))
 import Ray.Color (Color)
 import qualified Ray.Color as Color
 import Ray.Buffer (Buffer(..))
-import Ray.Scene.Types (Scene(..), Camera(..), Sphere(..), mkSphere)
+import Ray.Scene.Types (Scene(..), Camera(..), Object(..), Plane(..), Sphere(..), mkHPlane, mkSphere)
 import Ray.Canvas (Canvas(..))
 import qualified Ray.Math as Math (project, traceRay)
 
@@ -38,7 +38,7 @@ traceRays canvasSize scene@Scene{..} = do
 traceRay :: Scene -> V3 CFloat -> Color
 traceRay Scene{camera = Camera origin, ..} ray =
   let inf = fromIntegral (maxBound :: CInt)
-   in Math.traceRay spheres origin ray (projPlaneZ, inf)
+   in Math.traceRay objects origin ray (projPlaneZ, inf)
 
 -- | Projects a point to viewport.
 project :: V2 CInt -> Scene -> V2 CFloat -> V3 CFloat
@@ -50,7 +50,7 @@ example :: Scene
 example =
   let viewportSize = V2 1.0 1.0
       projPlaneZ = 1.0
-      spheres = [s1, s2, s3]
+      objects = [s1, s2, s3]
       origin = V3 0.0 0.0 0.0
       camera = Camera origin
    in Scene{..}

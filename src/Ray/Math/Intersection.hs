@@ -1,7 +1,6 @@
 module Ray.Math.Intersection
   ( Intersection(..)
-
-  , sphere
+  , color
   , point
   , inBounds
   , toColor
@@ -9,15 +8,14 @@ module Ray.Math.Intersection
 
 import Foreign.C.Types (CFloat)
 
-import Ray.Scene.Types (Sphere(..))
 import Ray.Color (Color)
 import qualified Ray.Color as Color
 
 -- | Nearest intersection point between ray and sphere.
-data Intersection = Intersection !Sphere !CFloat
+data Intersection = Intersection !Color !CFloat
 
-sphere :: Intersection -> Sphere
-sphere (Intersection s _) = s
+color :: Intersection -> Color
+color (Intersection c _) = c
 
 point :: Intersection -> CFloat
 point (Intersection _ p) = p
@@ -28,4 +26,4 @@ inBounds i (tMin, tMax) =
    in t >= tMin && t <= tMax
 
 toColor :: Maybe Intersection -> Color
-toColor = maybe Color.bg (color . sphere)
+toColor = maybe Color.bg color

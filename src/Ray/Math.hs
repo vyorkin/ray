@@ -13,7 +13,7 @@ import Data.Maybe (mapMaybe)
 import Foreign.C.Types (CInt, CFloat)
 import SDL (V2(..), V3(..))
 
-import Ray.Scene.Types (Sphere(..))
+import Ray.Scene.Types (Object(..), Plane(..), Sphere(..))
 import Ray.Color (Color)
 
 import Ray.Math.V3 ((<.>))
@@ -23,9 +23,9 @@ import qualified Ray.Math.Intersection as Intersection
 -- | Computes the intersection of the ray with every sphere,
 -- and returns the color of the sphere at the nearest intersection
 -- which is inside the requested range of 't'.
-traceRay :: [Sphere] -> V3 CFloat -> V3 CFloat -> (CFloat, CFloat) -> Color
-traceRay spheres origin ray _bounds =
-  let is = mapMaybe (intersect origin ray) spheres
+traceRay :: [Object] -> V3 CFloat -> V3 CFloat -> (CFloat, CFloat) -> Color
+traceRay objects origin ray _bounds =
+  let is = mapMaybe (intersect origin ray) objects
    in Intersection.toColor $ foldl' nearest Nothing is
   where
     nearest i2 i1 = maybe (Just i1) (closest i1) i2
@@ -40,8 +40,8 @@ traceRay spheres origin ray _bounds =
 -- | Returns two points of intersection between ray and sphere.
 -- * O - origin
 -- * D - ray
-intersect :: V3 CFloat -> V3 CFloat -> Sphere -> Maybe Intersection
-intersect origin ray s =
+intersect :: V3 CFloat -> V3 CFloat -> Object -> Maybe Intersection
+intersect origin ray (OSphere s color) =
   let
     c  = center s
     r  = radius s
@@ -55,7 +55,8 @@ intersect origin ray s =
    in
     if d < 0
     then Nothing
-    else Just $ Intersection s (min t1 t2)
+    else Just $ Intersection color (min t1 t2)
+intersect origin ray (OPlane p color) = Nothing
 
 -- | Projects a point on canvas to viewport.
 project
