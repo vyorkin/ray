@@ -5,6 +5,7 @@ module Ray.Math
   , module Ray.Math.Intersection
   ) where
 
+import Data.Function (on)
 import Data.List (foldl', minimumBy)
 import Data.Maybe (mapMaybe)
 import Foreign.C.Types (CFloat)
@@ -26,7 +27,6 @@ traceRay objects origin ray bounds =
    in Intersection.toColor $ foldl' nearest Nothing is
   where
     nearest i2 i1 = maybe (clamp i1) (Just . closest i1) i2
-    closest i1 i2 = minimumBy (\x1 x2 -> compare (point x1) (point x2)) [i1, i2]
-    clamp :: Intersection -> Maybe Intersection
+    closest i1 i2 = minimumBy (compare `on` point) [i1, i2]
     clamp i | inBounds i bounds = Just i
             | otherwise = Nothing
