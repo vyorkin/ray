@@ -25,7 +25,8 @@ import Ray.Math.Transform (project)
 traceRay :: Scene -> V3 CFloat -> (CFloat, CFloat) -> Color
 traceRay Scene{ camera = Camera origin, .. } ray (tMin, tMax) =
   let is = mapMaybe (intersect origin ray) objects
-   in calcColor (fromMaybe 0 ambient) lights $ foldl' nearest Nothing is
+      ni = foldl' nearest Nothing is
+   in calcColor (fromMaybe 0 ambient) lights ni
   where
     nearest i2 i1 = maybe (clamp i1) (Just . closest i1) i2
     closest i1 i2 = minimumBy (compare `on` iPoint) [i1, i2]
