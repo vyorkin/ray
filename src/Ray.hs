@@ -1,7 +1,9 @@
+{-# LANGUAGE BangPatterns #-}
 module Ray (run) where
 
 import Foreign.C.Types (CInt)
 import Control.Monad (when, unless)
+import Data.Word (Word32)
 
 import SDL (V2(..), ($=))
 import qualified SDL
@@ -23,7 +25,8 @@ data Context = Context
 run :: Config -> IO ()
 run config = do
   ctx <- setup config
-  loop ctx
+  ticks <- SDL.ticks
+  loop ticks 0 ctx
   cleanUp ctx
 
 setup :: Config -> IO Context
@@ -42,10 +45,18 @@ setup Config{..} = do
   where
     windowSize = fromIntegral <$> V2 width height
 
-loop :: Context -> IO ()
-loop ctx = do
+loop :: Word32 -> Word32 -> Context -> IO ()
+loop !lastTick !nframes ctx = do
   quit <- Events.handle
-  unless quit (draw ctx >>= loop)
+  unless quit $
+    if nframes < 10
+      then draw ctx >>= loop lastTick (nframes + 1)
+      else do
+        ticks <- SDL.ticks
+        let diff = fromIntegral $ ticks - lastTick
+            fps  = fromIntegral nframes / diff * 1000
+        putStrLn $ "FPS: " <> show (fps :: Double)
+        draw ctx >>= loop ticks 0
 
 draw :: Context -> IO Context
 draw Context{..} = do

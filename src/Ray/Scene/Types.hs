@@ -67,11 +67,11 @@ mkHPlane y = OPlane Plane {..}
     origin = V3 0 y 0
     normal = V3 0.0 1.0 0.0
 
-mkHSquare :: CFloat -> CFloat -> CFloat -> Color -> Object
-mkHSquare y width height = OSquare Square {..}
+mkHSquare :: Bool -> CFloat -> CFloat -> CFloat -> Color -> Object
+mkHSquare up y width height = OSquare Square {..}
   where
     origin = V3 x0 y z0
-    normal = V3 0.0 1.0 0.0
+    normal = V3 0.0 (if up then 1.0 else -1.0) 0.0
     plane  = Plane {..}
     xdir   = V3 1 0 0
     x0     = - width / 2.0

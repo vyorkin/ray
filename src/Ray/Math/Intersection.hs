@@ -12,7 +12,7 @@ module Ray.Math.Intersection
 
 import Control.Monad (guard)
 import Foreign.C.Types (CFloat)
-import SDL (V3(..), dot, distance)
+import SDL (V3(..), dot, distance, norm)
 
 import Ray.Scene.Types (Object(..), Sphere(..), Plane(..), Circle(..), Square(..))
 import Ray.Color (Color)
@@ -45,7 +45,25 @@ intersect start ray (OCircle (Circle plane radius) color) = do
   let r1 = distance (origin plane) (start + fmap (* len) ray)
   guard (r1 <= radius)
   pure i
-intersect _start _ray (OSquare Square {..} _color) = Nothing
+intersect start ray (OSquare Square {..} color) = do
+  i@(Intersection _ len) <- intersectPlane start ray color plane
+  let inPlane = (start + fmap (* len) ray) - origin plane
+      xdist = xdir `dot` inPlane
+      ydist = norm $ inPlane - fmap (* xdist) xdir
+  guard (xdist <= width && ydist <= height)
+  pure i
+
+-- | Private plane intersection helper.
+intersectPlane :: V3 CFloat -> V3 CFloat -> Color -> Plane -> Maybe Intersection
+intersectPlane start ray color Plane {..} =
+  let
+    prod = normal `dot` ray
+    w    = start - origin
+    len  = (- (normal `dot` w)) / (normal `dot` ray)
+  in
+    if prod >= 0
+    then Nothing
+    else Just $ Intersection color len
 
 intersectSphere :: V3 CFloat -> V3 CFloat -> Sphere -> Color -> Maybe Intersection
 intersectSphere start ray s color =
@@ -63,15 +81,3 @@ intersectSphere start ray s color =
     if d < 0
     then Nothing
     else Just $ Intersection color (min t1 t2)
-
--- | Private plane intersection helper.
-intersectPlane :: V3 CFloat -> V3 CFloat -> Color -> Plane -> Maybe Intersection
-intersectPlane start ray color Plane {..} =
-  let
-    prod = normal `dot` ray
-    w    = start - origin
-    len  = (- (normal `dot` w)) / (normal `dot` ray)
-  in
-    if prod >= 0
-    then Nothing
-    else Just $ Intersection color len
