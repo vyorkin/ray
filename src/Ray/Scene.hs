@@ -48,21 +48,25 @@ project canvasSize Scene{..} =
 -- | Example scene.
 example :: Scene
 example =
-  let viewportSize = V2 1 1
-      projPlaneZ = 1
-      objects = [s1, s2, s3, s4]
-      origin = V3 0 0 0
-      camera = Camera origin
-      ambient = Just 0.2
-      lights = [l1, l2]
-   in Scene{..}
+  let
+    viewportSize = V2 1 1
+    projPlaneZ = 1
+    objects = [s1, s2, s3, s4]
+    origin = V3 0 0 0
+    camera = Camera origin
+    ambient = Just 0.2
+    lights = [l1, l2]
+    -- lights = []
+   in
+    Scene{..}
   where
+    l1 = PointLight 0.6 (V3 2 1 0)
+    l2 = DirectionalLight 0.2 (V3 1 4 4)
+
     s1 = mkSphere (V3 0 (-1) 3) Color.red
     s2 = mkSphere (V3 2 0 4) Color.blue
     s3 = mkSphere (V3 (-2) 0 4) Color.green
     s4 = OSphere Sphere { radius = 5000, center = V3 0 (-5001) 0 } (V4 255 255 0 255)
-    l1 = PointLight 0.6 (V3 2 1 0)
-    l2 = DirectionalLight 0.2 (V3 1 4 4)
 
     -- color = Color 64 128 128 255
     -- p1@(OPlane plane _) = mkHPlane (3.0) color

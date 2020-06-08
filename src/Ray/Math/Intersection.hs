@@ -68,7 +68,7 @@ intersectSphere start ray s color =
     t2 = (-k2 - sqrt d) / 2 * k2
     t  = min t1 t2
     p  = step start ray t
-    n  = signorm (p - c)
+    n  = signorm $ p - c
    in
     if d < 0
     then Nothing

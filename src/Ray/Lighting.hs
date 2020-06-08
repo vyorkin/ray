@@ -25,7 +25,12 @@ computeAll p n = sum . map (compute p n)
 compute :: V3 CFloat -> V3 CFloat -> Light -> CFloat
 compute p n light =
   let l = dir light
-   in (Light.intensity light * n `dot` l) / (norm n * norm l)
+      d = n `dot` l
+   in clamp d $ (Light.intensity light * d) / (norm n * norm l)
   where
     dir (PointLight _ pos) = pos - p
     dir (DirectionalLight _ d) = d
+
+    clamp d x
+      | d > 0 = x
+      | otherwise = 0
