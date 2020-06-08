@@ -50,15 +50,15 @@ example :: Scene
 example =
   let viewportSize = V2 1.0 1.0
       projPlaneZ = 1.0
-      objects = [s1, s2, s3, c1]
+      objects = [s1, s2, s3]
       origin = V3 0.0 0.0 0.0
       camera = Camera origin
    in Scene{..}
   where
-    s1 = mkSphere (V3 0 (-1) 8) Color.red
-    s2 = mkSphere (V3 2 0 10) Color.blue
-    s3 = mkSphere (V3 (-2) 0 10) Color.green
-    color = Color 64 128 128 255
-    p1@(OPlane plane _) = mkHPlane (-2.0) color
-    c1 = OCircle  (Circle plane 10) color
+    s1 = mkSphere (V3 0 (-1) 3) Color.red
+    s2 = mkSphere (V3 2 0 4) Color.blue
+    s3 = mkSphere (V3 (-2) 0 4) Color.green
+    -- color = Color 64 128 128 255
+    -- p1@(OPlane plane _) = mkHPlane (-2.0) color
+    -- c1 = OCircle  (Circle plane 10) color
     -- sq1 = mkHSquare (-5.0) 10 10 (Color 64 128 128 255)

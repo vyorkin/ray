@@ -33,8 +33,8 @@ library
                        Ray.Scene
                          Ray.Scene.Types
                        Ray.Math
-                         Ray.Math.V3
                          Ray.Math.Intersection
+                         Ray.Math.Transform
 
   build-depends:       base ^>= 4.13
                      , text ^>= 1.2

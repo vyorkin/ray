@@ -38,21 +38,25 @@ data Plane = Plane
   , normal :: !(V3 CFloat)
   } deriving (Eq, Show)
 
-data Circle = Circle !Plane !CFloat -- Plane containing a circle and a radius from the plane's origin
+-- | Circle consists of a plane and a
+-- radius from the plane's origin
+data Circle = Circle !Plane !CFloat
   deriving (Eq, Show)
 
 data Square = Square
   { plane  :: !Plane
   , xdir   :: !(V3 CFloat)
+  -- ^ X-Axis direction
   , width  :: !CFloat
   , height :: !CFloat
   } deriving (Eq, Show)
 
-data Object = OSphere !Sphere !Color
-            | OPlane  !Plane  !Color
-            | OCircle !Circle !Color
-            | OSquare !Square !Color
-            deriving (Eq, Show)
+data Object
+  = OSphere !Sphere !Color
+  | OPlane  !Plane  !Color
+  | OCircle !Circle !Color
+  | OSquare !Square !Color
+  deriving (Eq, Show)
 
 mkSphere :: V3 CFloat -> Color -> Object
 mkSphere center = OSphere Sphere { radius = 1.0, .. }
