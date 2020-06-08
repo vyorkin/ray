@@ -1,5 +1,7 @@
 {-# LANGUAGE BangPatterns #-}
-module Ray (run) where
+module Ray
+  ( run
+  ) where
 
 import Foreign.C.Types (CInt)
 import Control.Monad (when, unless)

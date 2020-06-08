@@ -1,10 +1,8 @@
 module Ray.Math.Intersection
   ( Intersection(..)
-
   , point
   , inBounds
   , toColor
-
   , intersect
   , intersectSphere
   , intersectPlane
@@ -47,7 +45,7 @@ intersect start ray (OCircle (Circle plane radius) color) = do
   pure i
 intersect start ray (OSquare Square {..} color) = do
   i@(Intersection _ len) <- intersectPlane start ray color plane
-  let inPlane = (start + fmap (* len) ray) - origin plane
+  let inPlane = start + fmap (* len) ray - origin plane
       xdist = xdir `dot` inPlane
       ydist = norm $ inPlane - fmap (* xdist) xdir
   guard (xdist <= width && ydist <= height)
