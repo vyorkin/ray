@@ -30,6 +30,8 @@ library
                        Ray.Color
                        Ray.Buffer
                        Ray.Canvas
+                       Ray.Material
+                       Ray.Lighting
                        Ray.Scene
                          Ray.Scene.Types
                        Ray.Math

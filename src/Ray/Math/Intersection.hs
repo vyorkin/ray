@@ -1,8 +1,5 @@
 module Ray.Math.Intersection
   ( Intersection(..)
-  , point
-  , inBounds
-  , toColor
   , intersect
   , intersectSphere
   , intersectPlane
@@ -10,42 +7,35 @@ module Ray.Math.Intersection
 
 import Control.Monad (guard)
 import Foreign.C.Types (CFloat)
-import SDL (V3(..), dot, distance, norm)
+import SDL (V3(..), dot, distance, norm, signorm)
 
 import Ray.Scene.Types (Object(..), Sphere(..), Plane(..), Circle(..), Square(..))
 import Ray.Color (Color)
-import qualified Ray.Color as Color
 
--- | Nearest intersection point between ray and sphere.
-data Intersection = Intersection !Color !CFloat
+-- | Nearest intersection and color of a point.
+data Intersection = Intersection
+  { iColor  :: !Color
+  , iPoint  :: !(V3 CFloat)
+  , iNormal :: !(V3 CFloat)
+  } deriving (Eq, Show)
 
-point :: Intersection -> CFloat
-point (Intersection _ p) = p
+step :: V3 CFloat -> V3 CFloat -> CFloat -> V3 CFloat
+step o ray t = o + fmap (* t) ray
 
-inBounds :: Intersection -> (CFloat, CFloat) -> Bool
-inBounds i (tMin, tMax) =
-  let t = point i
-   in t >= tMin && t <= tMax
-
-toColor :: Maybe Intersection -> Color
-toColor = maybe Color.bg (\(Intersection c _) -> c)
-
--- | Returns two points of intersection between ray and sphere.
--- * O - origin
--- * D - ray
+-- | Returns intersection between ray and scene object.
 intersect :: V3 CFloat -> V3 CFloat -> Object -> Maybe Intersection
 intersect start ray (OSphere s color) =
   intersectSphere start ray s color
 intersect start ray (OPlane plane color) =
   intersectPlane start ray color plane
 intersect start ray (OCircle (Circle plane radius) color) = do
-  i@(Intersection _ len) <- intersectPlane start ray color plane
-  let r1 = distance (origin plane) (start + fmap (* len) ray)
+  i@(Intersection {..}) <- intersectPlane start ray color plane
+  let r1 = distance (origin plane) iPoint
   guard (r1 <= radius)
   pure i
 intersect start ray (OSquare Square {..} color) = do
-  i@(Intersection _ len) <- intersectPlane start ray color plane
-  let inPlane = start + fmap (* len) ray - origin plane
+  i@(Intersection _ p _) <- intersectPlane start ray color plane
+  let inPlane = p - origin plane
       xdist = xdir `dot` inPlane
       ydist = norm $ inPlane - fmap (* xdist) xdir
   guard (xdist <= width && ydist <= height)
@@ -58,10 +48,11 @@ intersectPlane start ray color Plane {..} =
     prod = normal `dot` ray
     w    = start - origin
     len  = (- (normal `dot` w)) / (normal `dot` ray)
+    p    = step start ray len
   in
     if prod >= 0
     then Nothing
-    else Just $ Intersection color len
+    else Just $ Intersection color p normal
 
 intersectSphere :: V3 CFloat -> V3 CFloat -> Sphere -> Color -> Maybe Intersection
 intersectSphere start ray s color =
@@ -69,13 +60,16 @@ intersectSphere start ray s color =
     c  = center s
     r  = radius s
     oc = start - c
-    k1 = dot ray ray
-    k2 = 2 * dot oc ray
-    k3 = dot oc oc - r * r
+    k1 = ray `dot` ray
+    k2 = 2 * oc `dot` ray
+    k3 = oc `dot` oc - r * r
     d  = k2 * k2 - 4 * k1 * k3
     t1 = (-k2 + sqrt d) / 2 * k1
     t2 = (-k2 - sqrt d) / 2 * k2
+    t  = min t1 t2
+    p  = step start ray t
+    n  = signorm (p - c)
    in
     if d < 0
     then Nothing
-    else Just $ Intersection color (min t1 t2)
+    else Just $ Intersection color p n

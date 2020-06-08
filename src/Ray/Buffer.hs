@@ -11,7 +11,7 @@ import qualified Data.ByteString as ByteString
 
 import SDL (V2(..))
 
-import Ray.Color (Color(..))
+import Ray.Color (Color)
 import qualified Ray.Color as Color
 
 newtype Buffer = Buffer [Color]
