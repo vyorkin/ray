@@ -1,13 +1,15 @@
+{-# LANGUAGE Strict #-}
 module Ray.Lighting
   ( calcColor
   ) where
 
 import Foreign.C.Types (CFloat)
-import SDL (V3(..), V4(..), dot, norm)
+import SDL (V3(..), V4(..))
 
 import Ray.Scene.Types (Light(..))
 import qualified Ray.Scene.Types as Light (intensity)
 import Ray.Math.Intersection (Intersection(..))
+import Ray.Math.Vector (dot, norm)
 import Ray.Color (Color)
 import qualified Ray.Color as Color
 

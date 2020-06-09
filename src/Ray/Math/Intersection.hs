@@ -1,3 +1,4 @@
+{-# LANGUAGE Strict #-}
 module Ray.Math.Intersection
   ( Intersection(..)
   , intersect
@@ -7,10 +8,11 @@ module Ray.Math.Intersection
 
 import Control.Monad (guard)
 import Foreign.C.Types (CFloat)
-import SDL (V3(..), dot, distance, norm, signorm)
+import SDL (V3(..))
 
 import Ray.Scene.Types (Object(..), Sphere(..), Plane(..), Circle(..), Square(..))
 import Ray.Color (Color)
+import Ray.Math.Vector (distance, dot, minus, norm, plus, scaledBy, signorm, quadrance)
 
 -- | Nearest intersection and color of a point.
 data Intersection = Intersection
@@ -20,7 +22,7 @@ data Intersection = Intersection
   } deriving (Eq, Show)
 
 step :: V3 CFloat -> V3 CFloat -> CFloat -> V3 CFloat
-step o ray t = o + fmap (* t) ray
+step o ray t = o `plus` (ray `scaledBy` t)
 
 -- | Returns intersection between ray and scene object.
 intersect :: V3 CFloat -> V3 CFloat -> Object -> Maybe Intersection
@@ -35,9 +37,9 @@ intersect start ray (OCircle (Circle plane radius) color) = do
   pure i
 intersect start ray (OSquare Square {..} color) = do
   i@(Intersection _ p _) <- intersectPlane start ray color plane
-  let inPlane = p - origin plane
+  let inPlane = p `minus` origin plane
       xdist = xdir `dot` inPlane
-      ydist = norm $ inPlane - fmap (* xdist) xdir
+      ydist = norm $ inPlane `minus` (xdir `scaledBy` xdist)
   guard (xdist <= width && ydist <= height)
   pure i
 
@@ -46,8 +48,8 @@ intersectPlane :: V3 CFloat -> V3 CFloat -> Color -> Plane -> Maybe Intersection
 intersectPlane start ray color Plane {..} =
   let
     prod = normal `dot` ray
-    w    = start - origin
-    len  = (- (normal `dot` w)) / (normal `dot` ray)
+    w    = start `minus` origin
+    len  = (- (normal `dot` w)) / prod
     p    = step start ray len
   in
     if prod >= 0
@@ -59,16 +61,16 @@ intersectSphere start ray s color =
   let
     c  = center s
     r  = radius s
-    oc = start - c
-    k1 = ray `dot` ray
+    oc = start `minus` c
+    k1 = quadrance ray
     k2 = 2 * oc `dot` ray
-    k3 = oc `dot` oc - r * r
+    k3 = quadrance oc - r * r
     d  = k2 * k2 - 4 * k1 * k3
     t1 = (-k2 + sqrt d) / 2 * k1
     t2 = (-k2 - sqrt d) / 2 * k2
     t  = min t1 t2
     p  = step start ray t
-    n  = signorm $ p - c
+    n  = signorm $ p `minus` c
    in
     if d < 0
     then Nothing

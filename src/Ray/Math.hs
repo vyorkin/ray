@@ -5,10 +5,9 @@ module Ray.Math
   , module Ray.Math.Intersection
   ) where
 
-import Data.Maybe (fromMaybe)
 import Data.Function (on)
 import Data.List (foldl', minimumBy)
-import Data.Maybe (mapMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
 import Foreign.C.Types (CFloat)
 import SDL (V3(..), distance)
 
