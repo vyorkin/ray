@@ -1,3 +1,4 @@
+{-# LANGUAGE Strict #-}
 module Ray.Math
   ( traceRay
 
@@ -9,7 +10,7 @@ import Data.Function (on)
 import Data.List (foldl', minimumBy)
 import Data.Maybe (fromMaybe, mapMaybe)
 import Foreign.C.Types (CFloat)
-import SDL (V3(..), distance)
+import SDL (V3(..))
 
 import Ray.Scene.Types (Scene(..), Camera(..))
 import Ray.Color (Color)
@@ -17,6 +18,7 @@ import Ray.Lighting (calcColor)
 
 import Ray.Math.Intersection (Intersection(..), intersect)
 import Ray.Math.Transform (project)
+import Ray.Math.Vector (distance)
 
 -- | Computes the intersection of the ray with every sphere,
 -- and returns the color of the sphere at the nearest intersection
