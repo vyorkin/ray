@@ -6,9 +6,8 @@ module Ray.Math
   , module Ray.Math.Intersection
   ) where
 
-import Data.Function (on)
-import Data.List (foldl', minimumBy)
-import Data.Maybe (fromMaybe, mapMaybe)
+import Data.List (foldl')
+import Data.Maybe (fromMaybe)
 import Foreign.C.Types (CFloat)
 import SDL (V3(..))
 
@@ -25,14 +24,14 @@ import Ray.Math.Vector (distance)
 -- which is inside the requested range of 't'.
 traceRay :: Scene -> V3 CFloat -> (CFloat, CFloat) -> Color
 traceRay Scene{ camera = Camera origin, .. } ray (tMin, tMax) =
-  let is = mapMaybe (intersect origin ray) objects
-      ni = foldl' nearest Nothing is
+  let ni = foldl' (\acc o -> maybe acc (nearest acc) $ intersect origin ray o) Nothing objects
    in calcColor (fromMaybe 0 ambient) lights ni
   where
     nearest i2 i1 = maybe (clamp i1) (Just . closest i1) i2
-    closest i1 i2 = minimumBy (compare `on` iPoint) [i1, i2]
+    closest i1@(Intersection _ p1 _) i2@(Intersection _ p2 _) = if p1 < p2 then i1 else i2
     inBounds i =
       let d = distance origin (iPoint i)
        in d >= tMin && d <= tMax
     clamp i | inBounds i = Just i
             | otherwise  = Nothing
+{-# INLINE traceRay #-}
