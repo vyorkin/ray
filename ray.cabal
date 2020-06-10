@@ -37,6 +37,7 @@ library
                        Ray.Math
                          Ray.Math.Intersection
                          Ray.Math.Transform
+                         Ray.Math.Vector
 
   build-depends:       base ^>= 4.13
                      , text ^>= 1.2
