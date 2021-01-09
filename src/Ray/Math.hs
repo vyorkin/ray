@@ -5,10 +5,9 @@ module Ray.Math
   , module Ray.Math.Intersection
   ) where
 
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, mapMaybe)
 import Data.Function (on)
 import Data.List (foldl', minimumBy)
-import Data.Maybe (mapMaybe)
 import Foreign.C.Types (CFloat)
 import SDL (V3(..), distance)
 
@@ -24,7 +23,7 @@ import Ray.Math.Transform (project)
 -- which is inside the requested range of 't'.
 traceRay :: Scene -> V3 CFloat -> (CFloat, CFloat) -> Color
 traceRay Scene{ camera = Camera origin, .. } ray (tMin, tMax) =
-  let is = mapMaybe (intersect origin ray) objects
+  let is = mapMaybe (origin `intersect` ray) objects
       ni = foldl' nearest Nothing is
    in calcColor (fromMaybe 0 ambient) lights ni
   where
